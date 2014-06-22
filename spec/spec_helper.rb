@@ -1,4 +1,5 @@
-require 'table_diff'
+require 'table_differ'
+require 'database_cleaner'
 
 
 RSpec.configure do |config|

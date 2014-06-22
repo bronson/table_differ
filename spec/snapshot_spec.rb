@@ -1,8 +1,11 @@
-describe TableDiff do
+describe TableDiffer do
+  class Model < ActiveRecord::Base
+    include TableDiffer
+  end
+
+  # let model { Model.new }
+
   it "takes a snapshot" do
-    expect(model.snapshots.length).to eq 0
-    model.create_snapshot
-    expect(model.snapshots.length).to eq 1
   end
 
   it "takes a name for a snapshot" do

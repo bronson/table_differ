@@ -1,7 +1,8 @@
 require "active_support/concern"
+require "active_record"
 
 
-module TableDiff
+module TableDiffer
   extend ActiveSupport::Concern
 
   included do

@@ -1,15 +1,15 @@
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'table_diff/version'
+require 'table_differ/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = "tablediff"
-  spec.version       = TableDiff::VERSION
+  spec.name          = "tablediffer"
+  spec.version       = TableDiffer::VERSION
   spec.authors       = ["Scott Bronson"]
-  spec.email         = ["brons_tablediff@rinspin.com"]
+  spec.email         = ["brons_tablediffer@rinspin.com"]
   spec.summary       = %q{Take snapshots of database tables and compute the differences between two snapshots.}
   # spec.description   = %q{}
-  spec.homepage      = "https://github.com/bronson/tablediff"
+  spec.homepage      = "https://github.com/bronson/tablediffer"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0")

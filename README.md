@@ -1,4 +1,4 @@
-# Tablediff
+# Table Differ
 
 Take snapshots of database tables and compute the differences between two snapshots.
 
@@ -7,7 +7,7 @@ Take snapshots of database tables and compute the differences between two snapsh
 The usual, add this line to your application's Gemfile:
 
 ```ruby
-gem 'tablediff'
+gem 'tablediffer'
 ```
 
 ## Usage
@@ -16,7 +16,7 @@ Add this line to each model that you want to snapshot:
 
 ```ruby
 class Property  < ActiveRecord::Base
-  include 'table_diff'
+  include 'table_differ'
   ...
 end
 ```
@@ -63,7 +63,7 @@ Property.delete_snapshot { |name| name < Property.snapshot_name(1.week.ago) }
 
 ## Internals
 
-Tablediff creates a full copy of the table whenever Snapshot is called.
+Table Differ creates a full copy of the table whenever Snapshot is called.
 If your tables are very large, this is not the gem for you.
 (TODO: could CREATE DATABASE ... TEMPLATE work to create snapshots?)
 
@@ -73,4 +73,4 @@ be super fast.
 
 ## Contributing
 
-Send issues and pull requests to [Tablediff's Github](github.com/bronson/tablediff).
+Send issues and pull requests to [Table Differ's Github](github.com/bronson/tablediffer).
