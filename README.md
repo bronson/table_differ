@@ -46,9 +46,9 @@ Property.snapshots
 Now, to retrieve a list of the differences, call diff:
 
 ```ruby
-differences = Property.diff    # diff between most recent and second most recent
-Property.diff 'import_0012'    # diff between most recent and named snapshot
-Property.diff 'cc', 'cd'       # difference between two named snapshots
+differences = Property.diff      # diff between most recent snapshot and model's table
+d2 = Property.diff 'import_0012' # diff between most recent snapshot and named snapshot
+d3 = Property.diff 'cc', 'cd'    # difference between two named snapshots
 ```
 
 ### Delete Snapshots
