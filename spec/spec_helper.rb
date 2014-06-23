@@ -11,9 +11,12 @@ RSpec.configure do |config|
   end
 
   config.before(:suite) do
-    ActiveRecord::Base.logger = Logger.new(STDERR)
-    ActiveRecord::Base.logger.level = Logger::ERROR
-    # ActiveRecord::Base.logger.level = Logger::DEBUG
+    if false
+      ActiveRecord::Base.logger = Logger.new(STDERR)
+      ActiveRecord::Base.logger.level = Logger::ERROR
+      ActiveRecord::Base.logger.level = Logger::DEBUG
+    end
+
     ActiveRecord::Base.establish_connection(:adapter => "sqlite3", :database  => ":memory:")
 
     ActiveRecord::Schema.define do

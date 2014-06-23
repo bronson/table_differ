@@ -23,9 +23,11 @@ module TableDiffer
     end
 
     def delete_snapshot name
+      connection.execute("DROP TABLE #{table_name + '_' + name}")
     end
 
     def delete_snapshots &block
+      # todo?
     end
 
     def diff
