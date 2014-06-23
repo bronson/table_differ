@@ -35,5 +35,16 @@ describe TableDiffer do
   end
 
   it "deletes a bunch of snapshots" do
+    Model.create_snapshot('21')
+    Model.create_snapshot('22')
+    Model.create_snapshot('33')
+
+    Model.delete_snapshots do |snapname|
+      # delete all tables with names divisble by 11
+      name = /(\d+)$/.match(snapname)[1]
+      (name.to_i % 11) == 0
+    end
+
+    expect(Model.snapshots.sort).to eq ['models_21']
   end
 end

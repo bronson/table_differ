@@ -5,11 +5,9 @@ require "active_record"
 module TableDiffer
   extend ActiveSupport::Concern
 
-  included do
-  end
-
   module ClassMethods
-    # pass a date, receive a value worthy of being a table name
+    # pass a date or name fragment, receive the full snapshot name.
+    # it's ok to pass a snapshot name; it will be returned unchaged.
     def snapshot_name name
       if name.kind_of?(Date) || name.kind_of?(Time)
         name = name.strftime("%Y%m%d_%H%M%S")
@@ -22,20 +20,27 @@ module TableDiffer
       name
     end
 
+    # returns an array of the snapshot names that currently exist
     def snapshots
       connection.tables.grep(/^#{table_name}_/).sort
     end
 
+    # creates a new snapshot
     def create_snapshot name=Time.now
       connection.execute("CREATE TABLE #{snapshot_name(name)} AS SELECT * FROM #{table_name}")
     end
 
+    # deletes the named snapshot
     def delete_snapshot name
       connection.execute("DROP TABLE #{snapshot_name(name)}")
     end
 
-    def delete_snapshots &block
-      # todo?
+    def delete_snapshots
+      snapshots.each do |name|
+        if yield(name)
+          delete_snapshot(name)
+        end
+      end
     end
 
     # ignore: %w[ created_at updated_at id ]
