@@ -16,30 +16,34 @@ describe TableDiffer do
   end
 
   it "detects no changes" do
-    added,removed = Model.diff_snapshot
+    added,removed,changed = Model.diff_snapshot
     expect(added).to eq []
     expect(removed).to eq []
+    expect(changed).to eq []
   end
 
   it "detects an added record" do
     three = Model.create!(name: 'three')
-    added,removed = Model.diff_snapshot
+    added,removed,changed = Model.diff_snapshot
     expect(added).to eq [three]
     expect(removed).to eq []
+    expect(changed).to eq []
   end
 
   it "detects a removed record" do
     two = Model.where(name: 'two').first.destroy
-    added,removed = Model.diff_snapshot
+    added,removed,changed = Model.diff_snapshot
     expect(added).to eq []
     expect(removed).to eq [two]
+    expect(changed).to eq []
   end
 
   it "detects a changed field" do
     one = Model.where(name: 'one').first
     one.update_attributes!(name: 'uno')
-    added,removed = Model.diff_snapshot
-    expect(added).to eq [one]
-    expect(removed).to eq [one]
+    added,removed,changed = Model.diff_snapshot
+    expect(added).to eq []
+    expect(removed).to eq []
+    expect(changed).to eq [one]
   end
 end
