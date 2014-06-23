@@ -11,6 +11,14 @@ RSpec.configure do |config|
   end
 
   config.before(:suite) do
+    ActiveRecord::Base.establish_connection(:adapter => "sqlite3", :database  => ":memory:")
+
+    ActiveRecord::Schema.define do
+      create_table :models do |table|
+        table.column :name, :string
+      end
+    end
+
     DatabaseCleaner.strategy = :transaction
     DatabaseCleaner.clean_with(:truncation)
   end

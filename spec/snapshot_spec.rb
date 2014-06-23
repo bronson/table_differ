@@ -6,10 +6,12 @@ describe TableDiffer do
   # let model { Model.new }
 
   it "takes a snapshot" do
+    expect(Model.snapshots.size).to eq 0
+    Model.create_snapshot
+    expect(Model.snapshots.size).to eq 1
   end
 
   it "takes a name for a snapshot" do
-    model.create_snapshot 'mysnapshot'
   end
 
   it "errors out if asked to create a duplicate snapshot" do
