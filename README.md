@@ -2,6 +2,8 @@
 
 Take snapshots of database tables and compute the differences between two snapshots.
 
+[![Build Status](https://api.travis-ci.org/bronson/tablediffer.png?branch=master)](http://travis-ci.org/bronson/tablediffer)
+
 ## Installation
 
 The usual, add this line to your application's Gemfile:
