@@ -46,12 +46,50 @@ Property.snapshots
 
 ### Compute Differences
 
-Now, to retrieve a list of the differences, call diff:
+Now, to retrieve a list of the differences, call diff_snapshot:
 
 ```ruby
-differences = Property.diff      # diff between most recent snapshot and model's table
-d2 = Property.diff 'import_0012' # diff between most recent snapshot and named snapshot
-d3 = Property.diff 'cc', 'cd'    # difference between two named snapshots
+added,removed,changed = Property.diff_snapshot
+```
+
+This computes the difference between the current table and the most recent
+snapshot (determined alphabetically).  Each value is an array of ActiveRecord
+objects.  `added` contains the records that have been added since the snapshot
+was taken, `removed` contains the records that were removed, and `changed` contains
+records where, of course, one or more of their columns have changed.  Tablediffer
+doesn't follow foreign keys so, if you want that, you'll need to do it manually.
+
+Records in added and changed are regular ActiveRecord objects -- you can modify
+their attributes and save them.  Records in removed, however, aren't backed by
+a database object.  You should generally treat them as read-only.
+
+#### Columns to Ignore
+
+By default, every column will be considered in the diff.
+You can pass columns to ignore like this:
+
+```ruby
+Property.diff_snapshot ignore: %w[ id created_at updated_at ]
+```
+
+Note that if you ignore the primary key, tablediffer can no longer compute which
+columns have changed.  Changed records will appear as a simultaneous add and remove,
+and the changed column will always be empty.  In those cases, just call it like this:
+
+```ruby
+added,removed = Attachment.diff_snapshot(ignore: 'id')
+```
+
+Also, if you ignore the ID, you won't be able to update or save any records directly
+(since, of course, they won't know their IDs).
+
+#### Specifying the Snapshot
+
+You can name the tables you want to diff explicitly:
+
+```ruby
+a,r,c = Property.diff_snapshot(old: 'import_0012')   # changes between the named snapshot and now
+a,r,c = Property.diff_snapshot('cc', 'cd')           # difference between the two named snapshots
 ```
 
 ### Delete Snapshots
@@ -61,14 +99,16 @@ Either pass a name or a proc to specify which snapshots should be deleted.
 
 ```ruby
 Property.delete_snapshot 'import_0012'
-Property.delete_snapshot { |name| name < Property.snapshot_name(1.week.ago) }
+
+week_old_name = Property.snapshot_name(1.week.ago)
+old_snapshots = Property.snapshots.select { |name| name < week_old_name }
+Property.delete_snapshots(old_snapshots)
 ```
 
 ## Internals
 
 Table Differ creates a full copy of the table whenever Snapshot is called.
 If your tables are very large, this is not the gem for you.
-(TODO: could CREATE DATABASE ... TEMPLATE work to create snapshots?)
 
 It diffs the tables server-side using two SELECT queries.  This should
 be super fast.
