@@ -11,6 +11,9 @@ RSpec.configure do |config|
   end
 
   config.before(:suite) do
+    ActiveRecord::Base.logger = Logger.new(STDERR)
+    ActiveRecord::Base.logger.level = Logger::ERROR
+    # ActiveRecord::Base.logger.level = Logger::DEBUG
     ActiveRecord::Base.establish_connection(:adapter => "sqlite3", :database  => ":memory:")
 
     ActiveRecord::Schema.define do
@@ -19,7 +22,8 @@ RSpec.configure do |config|
       end
     end
 
-    DatabaseCleaner.strategy = :transaction
+    # need to explicitly specify active_record since we don't have a database.yml?
+    DatabaseCleaner[:active_record].strategy = :transaction
     DatabaseCleaner.clean_with(:truncation)
   end
 

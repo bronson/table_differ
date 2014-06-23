@@ -11,7 +11,7 @@ module TableDiffer
   module ClassMethods
     # pass a date, receive a value worthy of being a table name
     def snapshot_name date
-      table_name + '_' + date.strftime("%Y%m%d_%H%M%S")
+      date.strftime("%Y%m%d_%H%M%S")
     end
 
     def snapshots
@@ -19,7 +19,7 @@ module TableDiffer
     end
 
     def create_snapshot name=snapshot_name(Time.now)
-      connection.execute("CREATE TABLE #{name} AS SELECT * FROM #{table_name}")
+      connection.execute("CREATE TABLE #{table_name + '_' + name} AS SELECT * FROM #{table_name}")
     end
 
     def delete_snapshot name
