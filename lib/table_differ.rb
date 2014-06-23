@@ -35,12 +35,9 @@ module TableDiffer
       connection.execute("DROP TABLE #{snapshot_name(name)}")
     end
 
-    def delete_snapshots
-      snapshots.each do |name|
-        if yield(name)
-          delete_snapshot(name)
-        end
-      end
+    # deletes every snapshot named in the array
+    def delete_snapshots snapshots
+      snapshots.each { |name| delete_snapshot(name) }
     end
 
     # ignore: %w[ created_at updated_at id ]
