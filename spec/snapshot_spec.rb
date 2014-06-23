@@ -1,7 +1,5 @@
 describe TableDiffer do
-  class Model < ActiveRecord::Base
-    include TableDiffer
-  end
+  include_context "model"
 
   it "takes a snapshot" do
     expect(Model.snapshots.size).to eq 0

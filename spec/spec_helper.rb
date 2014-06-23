@@ -38,6 +38,12 @@ RSpec.configure do |config|
 end
 
 
+RSpec.shared_context "model" do
+  class Model < ActiveRecord::Base
+    include TableDiffer
+  end
+end
+
 =begin
   maybe later...
 
