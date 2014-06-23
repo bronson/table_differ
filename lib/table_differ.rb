@@ -56,6 +56,13 @@ module TableDiffer
       added =   find_by_sql("SELECT #{cols} FROM #{newtable} EXCEPT SELECT #{cols} FROM #{oldtable}")
       removed = find_by_sql("SELECT #{cols} from #{oldtable} EXCEPT SELECT #{cols} FROM #{newtable}")
 
+      # hm, none of this seems to matter...  TODO: mark appropriate objects read-only: obj.readonly!
+      # AR always thinks the record is persisted in the db, even when it obviously isn't
+      # added.each   { |o| o.instance_variable_set("@new_record", true) } unless table_name == oldtable
+      # removed.each { |o| o.instance_variable_set("@new_record", true) } unless table_name == newtable
+      # actually, it's probably more reliable just to use the presence of an id to determine if the record can be saved
+      # [*added, *removed].select { |o| !o.id }.each { |o| o.instance_variable_set("@new_record", true) }
+
       changed = added & removed
       [added - changed, removed - changed, changed]
     end

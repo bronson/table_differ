@@ -13,7 +13,7 @@ describe "diffing a model" do
   #   # puts 'after'
   # end
 
-  # ids make it soooo much easier to dedup and check equality
+
   describe "with IDs" do
     it "detects no changes" do
       added,removed,changed = Model.diff_snapshot
@@ -28,8 +28,13 @@ describe "diffing a model" do
       added,removed,changed = Model.diff_snapshot
 
       expect(added).to eq [three]
+      expect(added.first.new_record?).to eq false
       expect(removed).to eq []
       expect(changed).to eq []
+
+      # added records are normal AR objects, try using it
+      added.first.update_attributes!(name: 'trois')
+      expect(Model.find(added.first.id).name).to eq 'trois'
     end
 
     it "detects a removed record" do
@@ -38,7 +43,13 @@ describe "diffing a model" do
 
       expect(added).to eq []
       expect(removed).to eq [two]
+      expect(removed.first.new_record?).to eq false
       expect(changed).to eq []
+
+      # calling save on the returned record should do nothing
+      expect(Model.count).to eq 1
+      removed.first.save!
+      expect(Model.count).to eq 1
     end
 
     it "detects a changed field" do
@@ -49,6 +60,25 @@ describe "diffing a model" do
       expect(added).to eq []
       expect(removed).to eq []
       expect(changed).to eq [one]
+      expect(changed.first.name).to eq 'uno'
+
+      # changed records are normal AR objects, try using it
+      changed.first.update_attributes!(name: 'nuevo')
+      expect(Model.find(changed.first.id).name).to eq 'nuevo'
+    end
+
+    it "resurrects a removed record" do
+      Model.where(name: 'two').first.destroy
+      _,removed,_ = Model.diff_snapshot
+
+      expect(Model.count).to eq 1
+      # we're expicitly setting the ID to the previous ID, that might not be ok?
+      Model.create!(removed.first.attributes)
+      expect(Model.count).to eq 2
+
+      # and now there are no differences
+      differences = Model.diff_snapshot
+      expect(differences).to eq [[], [], []]
     end
   end
 
@@ -69,7 +99,13 @@ describe "diffing a model" do
       added,removed = Model.diff_snapshot(ignore: :id)
 
       expect(added.map(&:attributes)).to eq [{"id" => nil, "name" => "three"}]
+      expect(added.first.new_record?).to eq false  # oh well
       expect(removed).to eq []
+
+      # wthout an ID, updating attributes should do nothing
+      added.first.update_attributes!(name: 'trois')
+      expect(Model.count).to eq 3
+      expect(Model.pluck(:name).sort).to eq ['one', 'three', 'two']  # no trois
     end
 
     it "detects a removed record" do
@@ -78,6 +114,7 @@ describe "diffing a model" do
 
       expect(added).to eq []
       expect(removed.map(&:attributes)).to eq [{"id" => nil, "name" => "two"}]
+      expect(removed.first.new_record?).to eq false  # oh well
       expect(changed).to eq []
     end
 
@@ -91,5 +128,32 @@ describe "diffing a model" do
       expect(removed.map(&:attributes)).to eq [{"id" => nil, "name" => "one"}]
       expect(changed).to eq []
     end
+
+    it "resurrects a removed record" do
+      Model.where(name: 'two').first.destroy
+      _,removed,_ = Model.diff_snapshot(ignore: :id)
+
+      expect(Model.count).to eq 1
+      Model.create!(removed.first.attributes)
+      expect(Model.count).to eq 2
+
+      differences = Model.diff_snapshot(ignore: :id)
+      expect(differences).to eq [[], [], []]
+    end
   end
+
+  # ensure we select the correct snapshots to diff between
+  # describe "with a bunch of snapshots" do
+  #   it "uses the most recent snapshot" do
+  #     Model.create!(name: 'only in newer')
+  #     Model.create_snapshot('newer')
+  #     added,removed,changed = Model.diff_snapshot
+  #   end
+
+  #   it "uses the named snapshot" do
+  #   end
+
+  #   it "uses the two named snapshots" do
+  #   end
+  # end
 end
