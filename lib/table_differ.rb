@@ -38,7 +38,16 @@ module TableDiffer
       # todo?
     end
 
-    def diff
+    # ignore: %w[ created_at updated_at id ]
+    def diff_snapshot oldtable=snapshots.last, newtable=table_name, options={}
+
+      columns = column_names - (options[:ignore] || [])
+      cols = columns.map { |c| "#{c} as #{c}" }.join(", ")
+
+      [
+        find_by_sql("SELECT #{cols} FROM #{newtable} EXCEPT SELECT #{cols} FROM #{oldtable}"),
+        find_by_sql("SELECT #{cols} from #{oldtable} EXCEPT SELECT #{cols} FROM #{newtable}")
+      ]
     end
   end
 end

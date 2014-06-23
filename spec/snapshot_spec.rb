@@ -3,8 +3,6 @@ describe TableDiffer do
     include TableDiffer
   end
 
-  # let model { Model.new }
-
   it "takes a snapshot" do
     expect(Model.snapshots.size).to eq 0
     Model.create_snapshot
