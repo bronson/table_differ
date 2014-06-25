@@ -9,6 +9,8 @@ module TableDiffer
     # pass a date or name fragment, receive the full snapshot name.
     # it's ok to pass a snapshot name; it will be returned unchaged.
     def snapshot_name name
+      return nil if name.nil?
+
       if name.kind_of?(Date) || name.kind_of?(Time)
         name = name.strftime("%Y%m%d_%H%M%S")
       end
@@ -42,8 +44,8 @@ module TableDiffer
 
     # ignore: %w[ created_at updated_at id ]
     def diff_snapshot options={}
-      oldtable = options[:old] || snapshots.last
-      newtable = options[:new] || table_name
+      oldtable = snapshot_name(options[:old]) || snapshots.last
+      newtable = snapshot_name(options[:new]) || table_name
 
       ignore = []
       if options[:ignore]

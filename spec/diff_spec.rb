@@ -143,17 +143,32 @@ describe "diffing a model" do
   end
 
   # ensure we select the correct snapshots to diff between
-  # describe "with a bunch of snapshots" do
-  #   it "uses the most recent snapshot" do
-  #     Model.create!(name: 'only in newer')
-  #     Model.create_snapshot('newer')
-  #     added,removed,changed = Model.diff_snapshot
-  #   end
+  describe "with a bunch of snapshots" do
+    it "uses the most recent snapshot" do
+      insecond = Model.create!(name: 'only in second')
+      Model.create_snapshot('second')
+      main = Model.create!(name: 'only in main table')
 
-  #   it "uses the named snapshot" do
-  #   end
 
-  #   it "uses the two named snapshots" do
-  #   end
-  # end
+      # each of the following is an individual test.
+      # not sure how I can make them all use the same db setup though.
+      # rspec really really needs a before(:all) { }.
+
+      # first make sure default diffs newer table
+      differences = Model.diff_snapshot
+      expect(differences).to eq [[main], [], []]
+
+      # now diff against older snapshot, ensure more changes
+      differences = Model.diff_snapshot old: 'original'
+      expect(differences).to eq [[insecond, main], [], []]
+
+      # specifying an older snapshot produces a reverse diff against the most recent snapshot
+      differences = Model.diff_snapshot new: 'models_original'
+      expect(differences).to eq [[], [insecond], []]
+
+      # finally, specify two named snapshots
+      differences = Model.diff_snapshot old: 'original', new: 'models_second'
+      expect(differences).to eq [[insecond], [], []]
+    end
+  end
 end
