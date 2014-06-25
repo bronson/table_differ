@@ -150,8 +150,8 @@ describe "diffing a model" do
       main = Model.create!(name: 'only in main table')
 
 
-      # each of the following is an individual test.
-      # not sure how I can make them all use the same db setup though.
+      # each of the following should be an individual test.
+      # not sure how I can make them all use the same db setup though...
       # rspec really really needs a before(:all) { }.
 
       # first make sure default diffs newer table

@@ -14,7 +14,7 @@ gem 'tablediffer'
 
 ## Usage
 
-Add this line to each model that you want to snapshot:
+Add this line to the models that will be snapshotted:
 
 ```ruby
 class Property  < ActiveRecord::Base
@@ -26,17 +26,18 @@ end
 ### Snapshot a Table
 
 Any time you want to snapshot a table (say, before a new import),
-call create_snapshot.
+call `create_snapshot`.
 
 ```ruby
 Property.create_snapshot
 Property.create_snapshot 'import_0012'
 ```
 
-If you don't specify a name for the snapshot, one will be created for you.
-To preserve sanity, your snapshot names need to sort alphabetically.
+If you don't specify a name then a numeric name based on the current
+date will be used (property_20140606_124722)
+To preserve your sanity, make sure snapshot names sort alphabetically.
 
-Use the snapshots method to return the snapshots that exist now:
+Use the snapshots method to return all the snapshots that exist now:
 
 ```ruby
 Property.snapshots

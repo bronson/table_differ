@@ -11,7 +11,7 @@ RSpec.configure do |config|
   end
 
   config.before(:suite) do
-    if false
+    if true
       ActiveRecord::Base.logger = Logger.new(STDERR)
       ActiveRecord::Base.logger.level = Logger::ERROR
       ActiveRecord::Base.logger.level = Logger::DEBUG
