@@ -59,9 +59,19 @@ was taken, `removed` contains the records that were removed, and `changed` conta
 records where, of course, one or more of their columns have changed.  Tablediffer
 doesn't follow foreign keys so, if you want that, you'll need to do it manually.
 
-Records in added and changed are regular ActiveRecord objects -- you can modify
-their attributes and save them.  Records in removed, however, aren't backed by
-a database object.  You should generally treat them as read-only.
+Records in `added` and `changed` are regular ActiveRecord objects -- you can modify
+their attributes and save them.  Records in `removed`, however, aren't backed by
+a database object and should be treated read-only.
+
+Changed records include a hash of the original attributes before the change was
+made.  For example, if you changed the name column from 'Nexus' to 'Nexii':
+
+```ruby
+record.attributes
+=> { 'id' => 1, 'name' => 'Nexus' }
+record.original_attributes
+=> { 'name' => 'Nexii' }   # id didn't change
+```
 
 #### Columns to Ignore
 
