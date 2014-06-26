@@ -18,7 +18,7 @@ Add this line to the models that will be snapshotted:
 
 ```ruby
 class Property  < ActiveRecord::Base
-  include 'table_differ'
+  include TableDiffer
   ...
 end
 ```

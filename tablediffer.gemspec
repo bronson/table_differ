@@ -3,7 +3,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'table_differ/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = "tablediffer"
+  spec.name          = "table_differ"
   spec.version       = TableDiffer::VERSION
   spec.authors       = ["Scott Bronson"]
   spec.email         = ["brons_tablediffer@rinspin.com"]
