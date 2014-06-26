@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["brons_tablediffer@rinspin.com"]
   spec.summary       = %q{Take snapshots of database tables and compute the differences between two snapshots.}
   # spec.description   = %q{}
-  spec.homepage      = "https://github.com/bronson/tablediffer"
+  spec.homepage      = "https://github.com/bronson/table_differ"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0")

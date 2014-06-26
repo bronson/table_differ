@@ -2,14 +2,14 @@
 
 Take snapshots of database tables and compute the differences between two snapshots.
 
-[![Build Status](https://api.travis-ci.org/bronson/tablediffer.png?branch=master)](http://travis-ci.org/bronson/tablediffer)
+[![Build Status](https://api.travis-ci.org/bronson/table_differ.png?branch=master)](http://travis-ci.org/bronson/table_differ)
 
 ## Installation
 
 The usual, add this line to your application's Gemfile:
 
 ```ruby
-gem 'tablediffer'
+gem 'table_differ'
 ```
 
 ## Usage
@@ -82,7 +82,7 @@ You can pass columns to ignore like this:
 Property.diff_snapshot ignore: %w[ id created_at updated_at ]
 ```
 
-Note that if you ignore the primary key, tablediffer can no longer compute which
+Note that if you ignore the primary key, Table Differ can no longer compute which
 columns have changed.  Changed records will appear as a simultaneous add and remove,
 and the changed column will always be empty.  In those cases, just call it like this:
 
@@ -126,4 +126,4 @@ be super fast.
 
 ## Contributing
 
-Send issues and pull requests to [Table Differ's Github](github.com/bronson/tablediffer).
+Send issues and pull requests to [Table Differ's Github](github.com/bronson/table_differ).
