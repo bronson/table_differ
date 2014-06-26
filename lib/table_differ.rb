@@ -5,6 +5,10 @@ require "active_record"
 module TableDiffer
   extend ActiveSupport::Concern
 
+  included do
+    attr_accessor :original_attributes
+  end
+
   module ClassMethods
     # pass a date or name fragment, receive the full snapshot name.
     # it's ok to pass a snapshot name; it will be returned unchaged.
@@ -66,6 +70,17 @@ module TableDiffer
       # [*added, *removed].select { |o| !o.id }.each { |o| o.instance_variable_set("@new_record", true) }
 
       changed = added & removed
+      changed.each do |obj|
+        orig = removed.find { |r| r == obj }
+        raise "this is impossible" if orig.nil?
+
+        nattrs = obj.attributes
+        # remove all unchanged elements -- original_attributes only contains changed values
+        oattrs = orig.attributes.reject { |k,v| nattrs.include?(k) && nattrs[k] == v }
+
+        obj.original_attributes = HashWithIndifferentAccess.new(oattrs)
+      end
+
       [added - changed, removed - changed, changed]
     end
   end

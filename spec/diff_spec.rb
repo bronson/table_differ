@@ -62,6 +62,10 @@ describe "diffing a model" do
       expect(changed).to eq [one]
       expect(changed.first.name).to eq 'uno'
 
+      # ensure we can access the previous value, with indifferent access
+      expect(changed.first.original_attributes[:name]).to eq 'one'
+      expect(changed.first.original_attributes).to eq({'name' => 'one'})
+
       # changed records are normal AR objects, try using it
       changed.first.update_attributes!(name: 'nuevo')
       expect(Model.find(changed.first.id).name).to eq 'nuevo'
@@ -143,32 +147,30 @@ describe "diffing a model" do
   end
 
   # ensure we select the correct snapshots to diff between
-  describe "with a bunch of snapshots" do
-    it "uses the most recent snapshot" do
-      insecond = Model.create!(name: 'only in second')
-      Model.create_snapshot('second')
-      main = Model.create!(name: 'only in main table')
+  it "uses the correct snapshot" do
+    insecond = Model.create!(name: 'only in second')
+    Model.create_snapshot('second')
+    main = Model.create!(name: 'only in main table')
 
 
-      # each of the following should be an individual test.
-      # not sure how I can make them all use the same db setup though...
-      # rspec really really needs a before(:all) { }.
+    # each of the following should be an individual test.
+    # not sure how I can make them all use the same db setup though...
+    # rspec really really needs a before(:all) { }.
 
-      # first make sure default diffs newer table
-      differences = Model.diff_snapshot
-      expect(differences).to eq [[main], [], []]
+    # first make sure default diffs newer table
+    differences = Model.diff_snapshot
+    expect(differences).to eq [[main], [], []]
 
-      # now diff against older snapshot, ensure more changes
-      differences = Model.diff_snapshot old: 'original'
-      expect(differences).to eq [[insecond, main], [], []]
+    # now diff against older snapshot, ensure more changes
+    differences = Model.diff_snapshot old: 'original'
+    expect(differences).to eq [[insecond, main], [], []]
 
-      # specifying an older snapshot produces a reverse diff against the most recent snapshot
-      differences = Model.diff_snapshot new: 'models_original'
-      expect(differences).to eq [[], [insecond], []]
+    # specifying an older snapshot produces a reverse diff against the most recent snapshot
+    differences = Model.diff_snapshot new: 'models_original'
+    expect(differences).to eq [[], [insecond], []]
 
-      # finally, specify two named snapshots
-      differences = Model.diff_snapshot old: 'original', new: 'models_second'
-      expect(differences).to eq [[insecond], [], []]
-    end
+    # finally, specify two named snapshots
+    differences = Model.diff_snapshot old: 'original', new: 'models_second'
+    expect(differences).to eq [[insecond], [], []]
   end
 end
