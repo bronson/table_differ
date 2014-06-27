@@ -32,8 +32,10 @@ module TableDiffer
     end
 
     # creates a new snapshot
-    def create_snapshot name=Time.now
-      connection.execute("CREATE TABLE #{snapshot_name(name)} AS SELECT * FROM #{table_name}")
+    def create_snapshot suggestion=Time.now
+      name = snapshot_name(suggestion)
+      connection.execute("CREATE TABLE #{name} AS SELECT * FROM #{table_name}")
+      name
     end
 
     # deletes the named snapshot

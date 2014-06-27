@@ -14,7 +14,7 @@ gem 'table_differ'
 
 ## Usage
 
-Add this line to the models that will be snapshotted:
+Include TableDiffer in models that will be snapshotted:
 
 ```ruby
 class Property  < ActiveRecord::Base
@@ -25,7 +25,7 @@ end
 
 ### Snapshot a Table
 
-Any time you want to snapshot a table (say, before a new import),
+Any time you want to snapshot a table (say, before a new data import),
 call `create_snapshot`.
 
 ```ruby
@@ -34,8 +34,9 @@ Property.create_snapshot 'import_0012'
 ```
 
 If you don't specify a name then a numeric name based on the current
-date will be used (property_20140606_124722)
-To preserve your sanity, make sure snapshot names sort alphabetically.
+date will be used (something like `property_20140606_124722`)
+Whatever naming scheme you use, the names need to sort alphabetically so
+Table Differ can know which one is most recent.
 
 Use the snapshots method to return all the snapshots that exist now:
 
@@ -73,6 +74,9 @@ record.original_attributes
 => { 'name' => 'Nexii' }   # id didn't change
 ```
 
+Single-Table Inheritance (STI) appears to work correctly (TODO: add this to tests!)
+
+
 #### Columns to Ignore
 
 By default, every column will be considered in the diff.
@@ -83,15 +87,16 @@ Property.diff_snapshot ignore: %w[ id created_at updated_at ]
 ```
 
 Note that if you ignore the primary key, Table Differ can no longer compute which
-columns have changed.  Changed records will appear as a simultaneous add and remove,
-and the changed column will always be empty.  In those cases, just call it like this:
+columns have changed.  Changed records will appear as a remove followed by an add,
+so you can ignore the empty third array.
 
 ```ruby
 added,removed = Attachment.diff_snapshot(ignore: 'id')
 ```
 
-Also, if you ignore the ID, you won't be able to update or save any records directly
-(since, of course, they won't know their IDs).
+Also, if you ignore the ID, you won't be able to update or save any models directly.
+You must copy the attributes to another model, one that was loaded from the database
+normally and still knows its ID.
 
 #### Specifying the Snapshot
 
@@ -99,7 +104,7 @@ You can name the tables you want to diff explicitly:
 
 ```ruby
 a,r,c = Property.diff_snapshot(old: 'import_0012')   # changes between the named snapshot and now
-a,r,c = Property.diff_snapshot('cc', 'cd')           # difference between the two named snapshots
+a,r,c = Property.diff_snapshot('cc', 'cd')           # difference between the two snapshots named cc and cd
 ```
 
 ### Delete Snapshots
@@ -118,10 +123,11 @@ Property.delete_snapshots(old_snapshots)
 ## Internals
 
 Table Differ creates a full copy of the table whenever Snapshot is called.
-If your tables are very large, this is not the gem for you.
+If your table is large enough that it would cause problems if it suddenly
+doubled in size, then this is not the gem for you.
 
-It diffs the tables server-side using two SELECT queries.  This should
-be super fast.
+Table Differ diffs the tables server-side using only two SELECT queries.
+This should be plenty fast for any normal usage.
 
 
 ## Contributing

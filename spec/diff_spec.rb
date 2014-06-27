@@ -149,7 +149,8 @@ describe "diffing a model" do
   # ensure we select the correct snapshots to diff between
   it "uses the correct snapshot" do
     insecond = Model.create!(name: 'only in second')
-    Model.create_snapshot('second')
+    name = Model.create_snapshot('second')
+    expect(name).to eq "models_second"
     main = Model.create!(name: 'only in main table')
 
 
