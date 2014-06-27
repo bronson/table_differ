@@ -3,6 +3,7 @@
 Take snapshots of database tables and compute the differences between two snapshots.
 
 [![Build Status](https://api.travis-ci.org/bronson/table_differ.png?branch=master)](http://travis-ci.org/bronson/table_differ)
+[![Gem Version](https://badge.fury.io/rb/table_differ.svg)](http://badge.fury.io/rb/table_differ)
 
 ## Installation
 
@@ -17,7 +18,7 @@ gem 'table_differ'
 ```ruby
 Attachment.create_snapshot
   => "attachments_20140626_233336"
-Attachment.first.touch               # set updated_at to right now
+Attachment.first.touch               # change updated_at to be right now
   => true
 added,removed,changed = Attachment.diff_snapshot
   => [[], [], [<Attachment 1>]]
