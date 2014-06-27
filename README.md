@@ -12,6 +12,20 @@ The usual, add this line to your application's Gemfile:
 gem 'table_differ'
 ```
 
+## Synopsis
+
+```ruby
+Attachment.create_snapshot
+  => "attachments_20140626_233336"
+Attachment.first.touch               # set updated_at to right now
+  => true
+added,removed,changed = Attachment.diff_snapshot
+  => [[], [], [<Attachment 1>]]
+changed.first.original_attributes    # returns the fields that have changed
+  => {"updated_at"=>Fri, 27 Jun 2014 05:45:56 UTC +00:00}
+Attachment.delete_snapshot "attachments_20140626_233336"
+```
+
 ## Usage
 
 Include TableDiffer in models that will be snapshotted:
@@ -71,7 +85,7 @@ made.  For example, if you changed the name column from 'Nexus' to 'Nexii':
 record.attributes
 => { 'id' => 1, 'name' => 'Nexus' }
 record.original_attributes
-=> { 'name' => 'Nexii' }   # id didn't change
+=> { 'name' => 'Nexii' }   # id didn't change so it's not included
 ```
 
 Single-Table Inheritance (STI) appears to work correctly (TODO: add this to tests!)
