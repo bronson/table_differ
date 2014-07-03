@@ -50,13 +50,19 @@ module TableDiffer
       snaps.each { |name| delete_snapshot(name) }
     end
 
-    def table_differ_remap_objects params, records
+    def table_differ_remap_objects params, records, table
+      model = self
+      if table != table_name
+        model = self.dup
+        model.table_name = table
+      end
+
       params = Array(params)
       records.map do |record|
         result = record
         if record.id.nil?   # don't look up real ActiveRecord object if we already have one
           args = params.inject({}) { |hash,key| hash[key] = record[key]; hash }
-          real_record = where(args).first
+          real_record = model.where(args).first
           if real_record
             real_record.original_attributes = record.attributes
             result = real_record
@@ -90,19 +96,19 @@ module TableDiffer
       # [*added, *removed].select { |o| !o.id }.each { |o| o.instance_variable_set("@new_record", true) }
 
       if options[:unique_by]
-        added = table_differ_remap_objects(options[:unique_by], added)
-        removed = table_differ_remap_objects(options[:unique_by], removed)
+        added = table_differ_remap_objects(options[:unique_by], added, newtable)
+        removed = table_differ_remap_objects(options[:unique_by], removed, oldtable)
       end
 
-      changed = added & removed
+      changed = added.select { |a| removed.find { |r| a.id == r.id }}
       changed.each do |obj|
-        orig = removed.find { |r| r == obj }
+        orig = removed.find { |r| r.id == obj.id }
         raise "this is impossible" if orig.nil?
         obj.original_attributes = (orig.original_attributes || orig.attributes).except(*ignore)
       end
 
       added -= changed
-      removed -= changed
+      removed.reject! { |r| changed.find { |c| r.id == c.id }}
       [*added, *removed].each { |o| o.original_attributes = nil }
 
       [added, removed, changed]

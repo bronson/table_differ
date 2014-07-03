@@ -2,6 +2,7 @@
 
 **0.6.0** &nbsp; 2 July 2014
 
+* Removed models with unique_by are returned with their old ID intact.
 * Added the `unique_by` option to discover changes even when ignoring the primary key.
 * original_attributes now contains all original attributes, not just the changed ones.
 * Added the ability to delete all snapshots: `delete_snapshots(:all)`
