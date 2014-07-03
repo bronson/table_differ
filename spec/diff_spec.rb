@@ -122,7 +122,7 @@ describe "diffing a model" do
     end
 
     # without an ID, we can't tell if anything changed
-    it "detects a changed field" do
+    it "detects a changed field by add/remove" do
       one = Model.where(name: 'one').first
       one.update_attributes!(name: 'uno')
       added,removed,changed = Model.diff_snapshot(ignore: :id)

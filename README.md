@@ -18,12 +18,11 @@ gem 'table_differ'
 ```ruby
 Attachment.create_snapshot
   => "attachments_20140626_233336"
-Attachment.first.touch               # change updated_at to be right now
-  => true
-added,removed,changed = Attachment.diff_snapshot
+Attachment.first.update_attributes!(name: 'newname')
+added,removed,changed = Attachment.diff_snapshot   # diffs against most recent snapshot
   => [[], [], [<Attachment 1>]]
 changed.first.original_attributes    # returns original value for each field
-  => {"updated_at"=>Fri, 27 Jun 2014 05:45:56 UTC +00:00}
+  => {"name" => 'oldname'}
 Attachment.delete_snapshot "attachments_20140626_233336"
 ```
 

@@ -23,6 +23,12 @@ RSpec.configure do |config|
       create_table :models do |table|
         table.column :name, :string
       end
+
+      create_table :surrogate_models do |table|
+        table.column :name, :string
+        table.column :original_name, :string
+        table.column :alternate_value, :string
+      end
     end
 
     # need to explicitly specify active_record since we don't have a database.yml?
@@ -40,6 +46,12 @@ end
 
 RSpec.shared_context "model" do
   class Model < ActiveRecord::Base
+    include TableDiffer
+  end
+end
+
+RSpec.shared_context "surrogate_model" do
+  class SurrogateModel < ActiveRecord::Base
     include TableDiffer
   end
 end

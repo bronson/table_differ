@@ -50,6 +50,20 @@ module TableDiffer
       snaps.each { |name| delete_snapshot(name) }
     end
 
+    def table_differ_remap_objects params, records
+      params = Array(params)
+      records.map do |record|
+        args = params.inject({}) { |hash,key| hash[key] = record[key]; hash }
+        real_record = where(args).first
+        if real_record
+          real_record.original_attributes = record.attributes
+          real_record
+        else
+          record
+        end
+      end
+    end
+
     # ignore: %w[ created_at updated_at id ]
     def diff_snapshot options={}
       oldtable = snapshot_name(options[:old]) || snapshots.last
@@ -73,14 +87,23 @@ module TableDiffer
       # actually, it's probably more reliable just to use the presence of an id to determine if the record can be saved
       # [*added, *removed].select { |o| !o.id }.each { |o| o.instance_variable_set("@new_record", true) }
 
+      if options[:remap_by]
+        added = table_differ_remap_objects(options[:remap_by], added)
+        removed = table_differ_remap_objects(options[:remap_by], removed)
+      end
+
       changed = added & removed
       changed.each do |obj|
         orig = removed.find { |r| r == obj }
         raise "this is impossible" if orig.nil?
-        obj.original_attributes = orig.attributes
+        obj.original_attributes = orig.original_attributes || orig.attributes
       end
 
-      [added - changed, removed - changed, changed]
+      added -= changed
+      removed -= changed
+      [*added, *removed].each { |o| o.original_attributes = nil }
+
+      [added, removed, changed]
     end
   end
 end
