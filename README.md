@@ -108,6 +108,20 @@ so you can ignore the empty third array.
 added,removed = Attachment.diff_snapshot(ignore: 'id')
 ```
 
+If there are other fields that you can use to uniquely identify the records,
+you can specify them in the unique_by option.  This will ensure that changes
+are returned (not just adds/removes), and the ActiveRecord objects returned are
+complete with IDs.  This requires one database lookup per returned object,
+however so, if your results sets are huge, this might not be a good idea.
+
+```ruby
+# Normally ingoring the ID prevents diff from being able to compute the changed records.
+# If we can tell it that one or more fields can be used to uniquely identify the object,
+# then it can compute the changed records and return full ActiveRecord objects.
+added,removed,changed = Contact.diff_snapshot(ignore: 'id', unique_by: [:property_id, :contact_id])
+
+```
+
 Also, if you ignore the ID, you won't be able to update or save any models directly.
 You must copy the attributes to another model, one that was loaded from the database
 normally and still knows its ID.

@@ -11,7 +11,7 @@ describe "diffing a model" do
     third = SurrogateModel.create!(name: 'three', original_name: 'three')
     second.destroy!
 
-    added,removed,changed = SurrogateModel.diff_snapshot(ignore: :id, remap_by: :original_name)
+    added,removed,changed = SurrogateModel.diff_snapshot(ignore: :id, unique_by: :original_name)
 
     # we can find added and changed records by surrogate IDs but, of course, can't find removed ones
     expect(added).to eq [third]
@@ -32,7 +32,7 @@ describe "diffing a model" do
 
     second.update_attributes!(name: 'uno')
 
-    added,removed,changed = SurrogateModel.diff_snapshot(ignore: :id, remap_by: [:original_name, 'alternate_value'])
+    added,removed,changed = SurrogateModel.diff_snapshot(ignore: :id, unique_by: [:original_name, 'alternate_value'])
 
     expect(added).to eq []
     expect(removed).to eq []

@@ -87,9 +87,9 @@ module TableDiffer
       # actually, it's probably more reliable just to use the presence of an id to determine if the record can be saved
       # [*added, *removed].select { |o| !o.id }.each { |o| o.instance_variable_set("@new_record", true) }
 
-      if options[:remap_by]
-        added = table_differ_remap_objects(options[:remap_by], added)
-        removed = table_differ_remap_objects(options[:remap_by], removed)
+      if options[:unique_by]
+        added = table_differ_remap_objects(options[:unique_by], added)
+        removed = table_differ_remap_objects(options[:unique_by], removed)
       end
 
       changed = added & removed
