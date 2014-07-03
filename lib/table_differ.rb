@@ -53,7 +53,7 @@ module TableDiffer
     def table_differ_remap_objects params, records, table
       model = self
       if table != table_name
-        model = self.dup
+        model = Class.new(self)
         model.table_name = table
       end
 
