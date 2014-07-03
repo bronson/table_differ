@@ -44,8 +44,10 @@ module TableDiffer
     end
 
     # deletes every snapshot named in the array
-    def delete_snapshots snapshots
-      snapshots.each { |name| delete_snapshot(name) }
+    # Model.delete_snapshots(:all) deletes all snapshots
+    def delete_snapshots snaps
+      snaps = self.snapshots if snaps == :all
+      snaps.each { |name| delete_snapshot(name) }
     end
 
     # ignore: %w[ created_at updated_at id ]

@@ -47,4 +47,11 @@ describe TableDiffer do
     Model.delete_snapshots(to_delete)
     expect(Model.snapshots.sort).to eq ['models_21']
   end
+
+  it "deletes all snapshots" do
+    Model.create_snapshot('snapname')
+    expect(Model.snapshots.size).to eq 1
+    Model.delete_snapshots(:all)
+    expect(Model.snapshots.size).to eq 0
+  end
 end
