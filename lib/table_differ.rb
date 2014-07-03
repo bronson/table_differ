@@ -64,6 +64,9 @@ module TableDiffer
           args = params.inject({}) { |hash,key| hash[key] = record[key]; hash }
           real_record = model.where(args).first
           if real_record
+            if model != self
+              real_record = self.new(real_record.attributes)  # convert fake model to real model
+            end
             real_record.original_attributes = record.attributes
             result = real_record
           end
@@ -100,15 +103,15 @@ module TableDiffer
         removed = table_differ_remap_objects(options[:unique_by], removed, oldtable)
       end
 
-      changed = added.select { |a| removed.find { |r| a.id == r.id }}
+      changed = added & removed
       changed.each do |obj|
-        orig = removed.find { |r| r.id == obj.id }
+        orig = removed.find { |r| r == obj }
         raise "this is impossible" if orig.nil?
         obj.original_attributes = (orig.original_attributes || orig.attributes).except(*ignore)
       end
 
       added -= changed
-      removed.reject! { |r| changed.find { |c| r.id == c.id }}
+      removed -= changed
       [*added, *removed].each { |o| o.original_attributes = nil }
 
       [added, removed, changed]

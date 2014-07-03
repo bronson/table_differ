@@ -17,7 +17,8 @@ describe "diffing a model" do
     # we can find added and changed records by surrogate IDs but, of course, can't find removed ones
     expect(added).to eq [third]
     expect(added.first.original_attributes).to eq nil
-    expect(removed.map(&:attributes)).to eq [{"id" => secid, "name" => "two", "original_name" => "two", "alternate_value" => nil}]
+    # expect(removed.map(&:attributes)).to eq [{"id" => secid, "name" => "two", "original_name" => "two", "alternate_value" => nil}]
+    expect(removed).to eq [second]
     expect(removed.first.original_attributes).to eq nil
     expect(changed).to eq [first]
     expect(changed.first.name).to eq 'uno'
