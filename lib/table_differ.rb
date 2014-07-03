@@ -53,14 +53,16 @@ module TableDiffer
     def table_differ_remap_objects params, records
       params = Array(params)
       records.map do |record|
-        args = params.inject({}) { |hash,key| hash[key] = record[key]; hash }
-        real_record = where(args).first
-        if real_record
-          real_record.original_attributes = record.attributes
-          real_record
-        else
-          record
+        result = record
+        if record.id.nil?   # don't look up real ActiveRecord object if we already have one
+          args = params.inject({}) { |hash,key| hash[key] = record[key]; hash }
+          real_record = where(args).first
+          if real_record
+            real_record.original_attributes = record.attributes
+            result = real_record
+          end
         end
+        result
       end
     end
 
