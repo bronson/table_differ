@@ -20,7 +20,7 @@ describe "diffing a model" do
     expect(removed.first.original_attributes).to eq nil
     expect(changed).to eq [first]
     expect(changed.first.name).to eq 'uno'
-    expect(changed.first.original_attributes).to eq({"id" => nil, "name" => 'one', "original_name" => 'one', "alternate_value" => nil})
+    expect(changed.first.original_attributes).to eq({"name" => 'one', "original_name" => 'one', "alternate_value" => nil})
   end
 
   it "detects a changed field using a composite surrogate" do

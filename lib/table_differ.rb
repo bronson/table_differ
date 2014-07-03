@@ -98,7 +98,7 @@ module TableDiffer
       changed.each do |obj|
         orig = removed.find { |r| r == obj }
         raise "this is impossible" if orig.nil?
-        obj.original_attributes = orig.original_attributes || orig.attributes
+        obj.original_attributes = (orig.original_attributes || orig.attributes).except(*ignore)
       end
 
       added -= changed
