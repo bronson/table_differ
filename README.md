@@ -125,10 +125,12 @@ a,r,c = Property.diff_snapshot('cc', 'cd')           # difference between the tw
 ### Delete Snapshots
 
 delete_snapshot gets rid of unwanted snapshots.
-Either pass a name or a proc to specify which snapshots should be deleted.
+Pass an array of names or a proc to specify which snapshots should be deleted,
+or `:all`.
 
 ```ruby
-Property.delete_snapshot 'import_0012'
+Property.delete_snapshot  'import_0012'
+Property.delete_snapshots :all
 
 week_old_name = Property.snapshot_name(1.week.ago)
 old_snapshots = Property.snapshots.select { |name| name < week_old_name }
