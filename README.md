@@ -22,7 +22,7 @@ Attachment.first.touch               # change updated_at to be right now
   => true
 added,removed,changed = Attachment.diff_snapshot
   => [[], [], [<Attachment 1>]]
-changed.first.original_attributes    # returns the fields that have changed
+changed.first.original_attributes    # returns original value for each field
   => {"updated_at"=>Fri, 27 Jun 2014 05:45:56 UTC +00:00}
 Attachment.delete_snapshot "attachments_20140626_233336"
 ```
@@ -86,7 +86,7 @@ made.  For example, if you changed the name column from 'Nexus' to 'Nexii':
 record.attributes
 => { 'id' => 1, 'name' => 'Nexus' }
 record.original_attributes
-=> { 'name' => 'Nexii' }   # id didn't change so it's not included
+=> { 'id' => 1, 'name' => 'Nexii' }
 ```
 
 Single-Table Inheritance (STI) appears to work correctly (TODO: add this to tests!)

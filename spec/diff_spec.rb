@@ -63,8 +63,7 @@ describe "diffing a model" do
       expect(changed.first.name).to eq 'uno'
 
       # ensure we can access the previous value, with indifferent access
-      expect(changed.first.original_attributes[:name]).to eq 'one'
-      expect(changed.first.original_attributes).to eq({'name' => 'one'})
+      expect(changed.first.original_attributes).to eq({'id' => one.id, 'name' => 'one'})
 
       # changed records are normal AR objects, try using it
       changed.first.update_attributes!(name: 'nuevo')

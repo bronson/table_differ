@@ -77,12 +77,7 @@ module TableDiffer
       changed.each do |obj|
         orig = removed.find { |r| r == obj }
         raise "this is impossible" if orig.nil?
-
-        nattrs = obj.attributes
-        # remove all unchanged elements -- original_attributes only contains changed values
-        oattrs = orig.attributes.reject { |k,v| nattrs.include?(k) && nattrs[k] == v }
-
-        obj.original_attributes = HashWithIndifferentAccess.new(oattrs)
+        obj.original_attributes = orig.attributes
       end
 
       [added - changed, removed - changed, changed]
