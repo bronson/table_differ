@@ -40,7 +40,7 @@ First, include TableDiffer in all your models:
 ActiveRecord::Base.send(:include, TableDiffer)
 ```
 
-or just those models that need snapshotting:
+or just the models that need snapshotting:
 
 ```ruby
 class Attachment  < ActiveRecord::Base
@@ -95,21 +95,20 @@ Property.delete_snapshots { |name| name < week_old_name }
 
 ## Compute Differences
 
-To retrieve a list of the differences between the table and a snapshot,
-or between two snapshots, call diff_snapshot:
+Use `diff_snapshot`:
 
 ```ruby
-added,removed,changed = Attachment.diff_snapshot      # compute the changes
-  => [[], [], [<Attachment 1>]]      # no records added or removed, but one was changed
-changed.first.original_attributes    # returns original value for each field
+added,removed,changed = Attachment.diff_snapshot # changes between table and latest snapshot
+  => [[], [], [<Attachment 1>]]      # no records were added or removed, but one was changed
+changed.first.original_attributes    # returns the original value for each changed field
   => {"name" => 'oldname'}
 ```
 
-You can name the tables you want to diff explicitly:
+You can name the snapshots you want to diff:
 
 ```ruby
-add,del,ch = Property.diff_snapshot(old: 'import_0012')   # differences between the named snapshot and the table
-add,del,ch = Property.diff_snapshot('cc', 'cd')           # differences between the snapshots named cc and cd
+add,del,ch = Property.diff_snapshot(old: 'import_0012')    # between snapshot and table
+add,del,ch = Property.diff_snapshot(old: 'cc', new: 'cd')  # between two snapshots
 ```
 
 With no arguments, diff_snapshot returns the differences between the current table
@@ -130,14 +129,14 @@ Records in `added` and `changed` are regular ActiveRecord objects -- you can mod
 their attributes and save them.  Records in `removed`, however, can't possibly be
 backed by a database object and should be treated read-only.
 
-Changed records include a hash of the original attributes before the change was
-made.  For example, if you changed the name column from 'Nexus' to 'Nexii':
+Changed records include an `original_attributes` hash.
+For example, if you changed a record's name from 'Nexus' to 'Nexii':
 
 ```ruby
 record.attributes
-=> { 'id' => 1, 'name' => 'Nexus' }
-record.original_attributes
 => { 'id' => 1, 'name' => 'Nexii' }
+record.original_attributes
+=> { 'id' => 1, 'name' => 'Nexus' }
 ```
 
 Single-Table Inheritance works correctly (TODO: add to the tests!)
@@ -171,7 +170,7 @@ All is not lost!  If there are other fields that uniquely identify the records,
 you can specify them in the unique_by option.  This will cause changes to
 be computed properly, and real ActiveRecord objects to be returned.
 This does require one database lookup per changed object, however, so it
-may be a bottleneck if there are an insane number of changes.
+may be a bottleneck if there are a huge number of changes.
 
 ```ruby
 # Normally ingoring the ID prevents diff from being able to compute the changed records.
@@ -183,13 +182,14 @@ added,removed,changed = Contact.diff_snapshot(ignore: 'id', unique_by: [:propert
 ## Internals
 
 Table Differ creates a full copy of the table whenever it creates a snapshot.
-If you don't have enough disk space for this, don't create snapshots.
+Make sure you have enough disk space!
 
-Table Differ creates and restores snapshots with a single CREATE/SELECT statement,
-and it diffs the tables 100% server-side using two SELECTs.  It should be quite fast.
+Table Differ creates and restores snapshots with a single SELECT statement,
+and it diffs the tables 100% server-side using two SELECT statements (unless
+you're using `unique_by`).  It should be fast enough.
 
-It doesn't touch indexes.  Snapshotting and restoring will not affect the indexes
-that you've created though, if you have a lot of indexes, restoring a snapshot might
+We don't touch indexes.  Snapshotting and restoring will not affect the indexes
+that you've created. If your table has a lot of indexes, restoring a snapshot might
 take a long time.
 
 
@@ -200,4 +200,4 @@ take a long time.
 
 ## Contributing
 
-Table Differ is licensed under pain-free MIT.  Issues and pull requests go on [Github](github.com/bronson/table_differ).
+Table Differ is licensed under pain-free MIT.  Issues and pull requests on [Github](github.com/bronson/table_differ).
