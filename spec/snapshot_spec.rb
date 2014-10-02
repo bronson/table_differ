@@ -34,24 +34,28 @@ describe TableDiffer do
     expect(Model.snapshots.size).to eq 0
   end
 
-  it "deletes a bunch of snapshots" do
+  it "deletes all snapshots" do
+    Model.create_snapshot('snapname')
+    expect(Model.snapshots.size).to eq 1
+    Model.delete_snapshots
+    expect(Model.snapshots.size).to eq 0
+  end
+
+  it "doesn't delete snapshots if none specified" do
+    Model.create_snapshot('snapname')
+    expect(Model.snapshots.size).to eq 1
+    Model.delete_snapshots []
+    expect(Model.snapshots.size).to eq 1
+    Model.delete_snapshots(Model.snapshots)
+    expect(Model.snapshots.size).to eq 0
+  end
+
+  it "deletes a block of snapshots" do
     Model.create_snapshot('21')
     Model.create_snapshot('22')
     Model.create_snapshot('33')
 
-    to_delete = Model.snapshots.select do |snapname|
-      # return true for all tables with names divisble by 11
-      name = /(\d+)$/.match(snapname)[1]
-      (name.to_i % 11) == 0
-    end
-    Model.delete_snapshots(to_delete)
+    Model.delete_snapshots { |name| name == 'models_22' || name == 'models_33' }
     expect(Model.snapshots.sort).to eq ['models_21']
-  end
-
-  it "deletes all snapshots" do
-    Model.create_snapshot('snapname')
-    expect(Model.snapshots.size).to eq 1
-    Model.delete_snapshots(:all)
-    expect(Model.snapshots.size).to eq 0
   end
 end

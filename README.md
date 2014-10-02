@@ -15,14 +15,13 @@ gem 'table_differ'
 
 ## Synopsis
 
+To follow this, replace `Attachment` with any model from your own application.
+Once you restore the snapshot, your database should appear unchanged.
+
 ```ruby
 Attachment.create_snapshot
   => "attachments_20140626_233336"
-Attachment.first.update_attributes!(name: 'newname')
-added,removed,changed = Attachment.diff_snapshot   # diffs against most recent snapshot
-  => [[], [], [<Attachment 1>]]
-changed.first.original_attributes    # returns original value for each field
-  => {"name" => 'oldname'}
+Attachment.first.update_attributes!(name: 'newname')  # make a change
 Attachment.delete_snapshot "attachments_20140626_233336"
 ```
 
@@ -31,32 +30,45 @@ Attachment.delete_snapshot "attachments_20140626_233336"
 Include TableDiffer in models that will be snapshotted:
 
 ```ruby
-class Property  < ActiveRecord::Base
+class Attachment  < ActiveRecord::Base
   include TableDiffer
   ...
 end
 ```
 
-### Snapshot a Table
-
-Any time you want to snapshot a table (say, before a new data import),
-call `create_snapshot`.
+### Create Snapshot
 
 ```ruby
 Property.create_snapshot
 Property.create_snapshot 'import_0012'
 ```
 
-If you don't specify a name then a numeric name based on the current
-date will be used (something like `property_20140606_124722`)
-Whatever naming scheme you use, the names need to sort alphabetically so
-Table Differ can know which one is most recent.
+If you don't specify a name then one will be specified for you.
+Whatever naming scheme you use, the names should sort alphabetically.
+Otherwise some Table Differ functions won't default to the most recent snapshot.
 
-Use the snapshots method to return all the snapshots that exist now:
+### List Snapshots
 
 ```ruby
 Property.snapshots
 => ['property_import_0011', 'property_import_0012']
+```
+
+### Delete Snapshots
+
+```ruby
+Property.delete_snapshot  'import_0012'
+```
+
+Or multiple snapshots:
+
+```ruby
+Property.delete_snapshots  ['import_01', 'import_02']
+Property.delete_snapshots  # deletes all Property snapshots
+
+# more complex: delete all snapshots more than one week old
+week_old_name = Property.snapshot_name(1.week.ago)
+Property.delete_snapshots { |name| name < week_old_name }
 ```
 
 ### Compute Differences
@@ -64,19 +76,23 @@ Property.snapshots
 Now, to retrieve a list of the differences, call diff_snapshot:
 
 ```ruby
-added,removed,changed = Property.diff_snapshot
+added,removed,changed = Attachment.diff_snapshot      # compute the change
+  => [[], [], [<Attachment 1>]]
+changed.first.original_attributes    # returns original value for each field
+  => {"name" => 'oldname'}
 ```
 
 This computes the difference between the current table and the most recent
 snapshot (determined alphabetically).  Each value is an array of ActiveRecord
 objects.  `added` contains the records that have been added since the snapshot
 was taken, `removed` contains the records that were removed, and `changed` contains
-records where, of course, one or more of their columns have changed.  Tablediffer
-doesn't follow foreign keys so, if you want that, you'll need to do it manually.
+records where, of course, one or more of their columns have changed.  Table Differ
+doesn't follow foreign keys for that would be madness.  If you want to discover
+changes in related tables, you'll need to snapshot and diff them one by one.
 
 Records in `added` and `changed` are regular ActiveRecord objects -- you can modify
 their attributes and save them.  Records in `removed`, however, aren't backed by
-a database object and should be treated read-only.
+a database object (obviously) and should be treated read-only.
 
 Changed records include a hash of the original attributes before the change was
 made.  For example, if you changed the name column from 'Nexus' to 'Nexii':
@@ -101,25 +117,24 @@ Property.diff_snapshot ignore: %w[ id created_at updated_at ]
 ```
 
 Note that if you ignore the primary key, Table Differ can no longer compute which
-columns have changed.  Changed records will appear as a remove followed by an add,
-so you can ignore the empty third array.
+columns have changed.  This is no problem, but changed records will appear as a
+remove followed by an add.  The changed array will always be empty.
 
 ```ruby
 added,removed = Attachment.diff_snapshot(ignore: 'id')
 ```
 
-If there are other fields that you can use to uniquely identify the records,
-you can specify them in the unique_by option.  This will ensure that changes
-are returned (not just adds/removes), and the ActiveRecord objects returned are
+If there are other fields that uniquely identify the records,
+you can specify them in the unique_by option.  This will cause changes to
+be computed, and the ActiveRecord objects returned are
 complete with IDs.  This requires one database lookup per returned object,
-however so, if your results sets are huge, this might not be a good idea.
+however so, if your results are large, this might not be a good idea.
 
 ```ruby
 # Normally ingoring the ID prevents diff from being able to compute the changed records.
-# If we can tell it that one or more fields can be used to uniquely identify the object,
-# then it can compute the changed records and return full ActiveRecord objects.
+# If we can use one or more fields to uniquely identify the object,
+# then changesets can be computed and full ActiveRecord objects will be returned.
 added,removed,changed = Contact.diff_snapshot(ignore: 'id', unique_by: [:property_id, :contact_id])
-
 ```
 
 Also, if you ignore the ID, you won't be able to update or save any models directly.
@@ -131,23 +146,8 @@ normally and still knows its ID.
 You can name the tables you want to diff explicitly:
 
 ```ruby
-a,r,c = Property.diff_snapshot(old: 'import_0012')   # changes between the named snapshot and now
-a,r,c = Property.diff_snapshot('cc', 'cd')           # difference between the two snapshots named cc and cd
-```
-
-### Delete Snapshots
-
-delete_snapshot gets rid of unwanted snapshots.
-Pass an array of names or a proc to specify which snapshots should be deleted,
-or `:all`.
-
-```ruby
-Property.delete_snapshot  'import_0012'
-Property.delete_snapshots :all
-
-week_old_name = Property.snapshot_name(1.week.ago)
-old_snapshots = Property.snapshots.select { |name| name < week_old_name }
-Property.delete_snapshots(old_snapshots)
+add,del,ch = Property.diff_snapshot(old: 'import_0012')   # differences between the named snapshot and the table
+add,del,ch = Property.diff_snapshot('cc', 'cd')           # differences between the snapshots named cc and cd
 ```
 
 ## Internals

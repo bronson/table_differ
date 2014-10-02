@@ -45,14 +45,15 @@ module TableDiffer
 
     # deletes every snapshot named in the array
     # Model.delete_snapshots(:all) deletes all snapshots
-    def delete_snapshots snaps
-      snaps = self.snapshots if snaps == :all
+    def delete_snapshots snaps=self.snapshots, &block
+      snaps = snaps.select(&block) if block
       snaps.each { |name| delete_snapshot(name) }
     end
 
     def table_differ_remap_objects params, records, table
       model = self
       if table != table_name
+        # create an exact copy of the model, but using a different table
         model = Class.new(self)
         model.table_name = table
       end
@@ -75,7 +76,6 @@ module TableDiffer
       end
     end
 
-    # ignore: %w[ created_at updated_at id ]
     def diff_snapshot options={}
       oldtable = snapshot_name(options[:old]) || snapshots.last
       newtable = snapshot_name(options[:new]) || table_name
