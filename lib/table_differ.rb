@@ -1,3 +1,6 @@
+# Copyright 2014 Scott Bronson
+# Licensed under pain-free MIT. See LICENSE.txt.
+
 require "active_support/concern"
 require "active_record"
 
