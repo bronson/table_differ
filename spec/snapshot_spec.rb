@@ -42,9 +42,11 @@ describe TableDiffer do
 
   it "doesn't destroy the database if the snapshot can't be found" do
     snapshot = Model.create_snapshot('snapname')
+    Model.create!(name: 'one')
     expect {
       Model.restore_snapshot(snapshot+' ')
     }.to raise_error(/doesn't exist/)
+    expect(Model.count).to eq 1
     Model.delete_snapshot(snapshot)
   end
 

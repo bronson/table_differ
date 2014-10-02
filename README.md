@@ -34,7 +34,13 @@ Attachment.delete_snapshot(snapshot)
 
 ## Usage
 
-Include TableDiffer in models that will be snapshotted:
+First, include TableDiffer in all your models:
+
+```ruby
+ActiveRecord::Base.send(:include, TableDiffer)
+```
+
+or just those models that need snapshotting:
 
 ```ruby
 class Attachment  < ActiveRecord::Base
@@ -42,6 +48,8 @@ class Attachment  < ActiveRecord::Base
   ...
 end
 ```
+
+Now your models will respond to the following methods.
 
 ### Create Snapshot
 
@@ -52,7 +60,8 @@ Property.create_snapshot 'import_0012'
 
 If you don't specify a name then one will be specified for you.
 Whatever naming scheme you use, the names should sort alphabetically.
-Otherwise some Table Differ functions won't be able to default to the most recent snapshot.
+Otherwise Table Differ won't be able to figure out which is the most
+recent snapshot.
 
 ### List Snapshots
 
