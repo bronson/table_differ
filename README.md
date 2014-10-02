@@ -1,6 +1,6 @@
 # Table Differ
 
-Take snapshots of database tables and compute the differences between two snapshots.
+Snapshot database tables, restore them, and compute the differences between two snapshots.
 
 [![Build Status](https://api.travis-ci.org/bronson/table_differ.png?branch=master)](http://travis-ci.org/bronson/table_differ)
 [![Gem Version](https://badge.fury.io/rb/table_differ.svg)](http://badge.fury.io/rb/table_differ)
@@ -156,8 +156,14 @@ Table Differ creates a full copy of the table whenever Snapshot is called.
 If your table is large enough that it would cause problems if it suddenly
 doubled in size, then this is not the gem for you.
 
-Table Differ diffs the tables server-side using only two SELECT queries.
-This should be plenty fast for any normal usage.
+Table Differ creates and restores snapshots with a single CREATE/SELECT statement,
+and it diffs the tables 100% server-side using two SELECTs.
+If there's a speed issue, it's probably not due to Table Differ.
+
+
+## Alternatives
+
+* [Stellar](https://github.com/fastmonkeys/stellar) appears to do the same thing, written in Python.
 
 
 ## Contributing

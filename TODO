@@ -1,2 +1,3 @@
+TODO: the diff_snapshot(old: s) syntax is weird.
 TODO: try to mark relevant records read-only
 TODO: could CREATE DATABASE ... TEMPLATE work to create snapshots?
