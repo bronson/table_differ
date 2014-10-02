@@ -38,6 +38,14 @@ module TableDiffer
       name
     end
 
+    def restore_snapshot name
+      name = snapshot_name(name)
+      raise "#{name} doesn't exist" unless connection.tables.include?(name)
+
+      delete_all
+      connection.execute("INSERT INTO #{table_name} SELECT * FROM #{name}")
+    end
+
     # deletes the named snapshot
     def delete_snapshot name
       connection.execute("DROP TABLE #{snapshot_name(name)}")

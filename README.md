@@ -19,10 +19,17 @@ To follow this, replace `Attachment` with any model from your own application.
 Once you restore the snapshot, your database should appear unchanged.
 
 ```ruby
-Attachment.create_snapshot
-  => "attachments_20140626_233336"
-Attachment.first.update_attributes!(name: 'newname')  # make a change
-Attachment.delete_snapshot "attachments_20140626_233336"
+snapshot = Attachment.create_snapshot
+Attachment.first.update_attributes!(name: 'newname')    # make a change
+#     or run rake db:migrate, Attachment.delete_all, or anything.
+
+# compute the changes
+added,removed,changed = Attachment.diff_snapshot(snapshot)
+  => [[], [], [<Attachment 1>]]
+
+Attachment.restore_snapshot(snapshot)
+Attachment.delete_snapshot(snapshot)
+# and we're right back where we started
 ```
 
 ## Usage
@@ -45,13 +52,19 @@ Property.create_snapshot 'import_0012'
 
 If you don't specify a name then one will be specified for you.
 Whatever naming scheme you use, the names should sort alphabetically.
-Otherwise some Table Differ functions won't default to the most recent snapshot.
+Otherwise some Table Differ functions won't be able to default to the most recent snapshot.
 
 ### List Snapshots
 
 ```ruby
 Property.snapshots
 => ['property_import_0011', 'property_import_0012']
+```
+
+### Restore Snapshot
+
+```ruby
+Property.restore_snapshot 'import_0012'
 ```
 
 ### Delete Snapshots
@@ -157,8 +170,10 @@ If your table is large enough that it would cause problems if it suddenly
 doubled in size, then this is not the gem for you.
 
 Table Differ creates and restores snapshots with a single CREATE/SELECT statement,
-and it diffs the tables 100% server-side using two SELECTs.
-If there's a speed issue, it's probably not due to Table Differ.
+and it diffs the tables 100% server-side using two SELECTs.  It should be fast
+enough.
+
+It doesn't touch indicies.
 
 
 ## Alternatives

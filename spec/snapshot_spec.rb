@@ -27,6 +27,27 @@ describe TableDiffer do
     expect(Model.snapshots.sort).to eq ['models_aiee', 'models_bee', 'models_cee']
   end
 
+  it "restores a snapshot" do
+    # TODO: test that it doesn't delete any indices
+    Model.create!(name: 'one')
+    first_id = Model.first.id   # ensure the ID doesn't change
+    snapshot = Model.create_snapshot('snapname')
+    Model.create!(name: 'two')
+
+    Model.restore_snapshot(snapshot)
+    expect(Model.pluck(:id, :name).sort).to eq [[first_id, 'one']]
+
+    Model.delete_snapshot(snapshot)
+  end
+
+  it "doesn't destroy the database if the snapshot can't be found" do
+    snapshot = Model.create_snapshot('snapname')
+    expect {
+      Model.restore_snapshot(snapshot+' ')
+    }.to raise_error(/doesn't exist/)
+    Model.delete_snapshot(snapshot)
+  end
+
   it "deletes a named snapshot" do
     Model.create_snapshot('snapname')
     expect(Model.snapshots.size).to eq 1
