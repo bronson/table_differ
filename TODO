@@ -1,3 +1,5 @@
+TODO: STI works, but we need to add tests.
 TODO: the diff_snapshot(old: s) syntax is weird.
 TODO: try to mark relevant records read-only
+TODO: somehow get Rails to ignore snapshots when computing schema?
 TODO: could CREATE DATABASE ... TEMPLATE work to create snapshots?

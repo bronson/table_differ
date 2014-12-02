@@ -15,26 +15,33 @@ gem 'table_differ'
 
 ## Synopsis
 
-To follow this, replace `Attachment` with any model from your own application.
-Once you restore the snapshot, your database should appear unchanged.
+You can run this scenario by replace `Attachment` with any model from
+your own application.
 
 ```ruby
 snapshot = Attachment.create_snapshot
-Attachment.first.update_attributes!(name: 'newname')    # make a change
-#     or run rake db:migrate, Attachment.delete_all, or anything.
+
+# Make some changes. Run Attachment.delete_all, pretty much anything.
+Attachment.first.update_attributes!(name: 'newname')
 
 # compute the changes
 added,removed,changed = Attachment.diff_snapshot(snapshot)
   => [[], [], [<Attachment 1>]]
 
+# examine the changes
+changed.first.attributes[:name]
+  => 'newname'
+changed.first.original_attributes[:name]
+  => 'oldname'
+
+# restore everything to the way it was
 Attachment.restore_snapshot(snapshot)
 Attachment.delete_snapshot(snapshot)
-# and we're right back where we started
 ```
 
 ## Usage
 
-First, include TableDiffer in all your models:
+First, include TableDiffer functionality in your models:
 
 ```ruby
 ActiveRecord::Base.send(:include, TableDiffer)
@@ -126,8 +133,8 @@ Table Differ doesn't follow foreign keys for that would be madness.  If you want
 changes in related tables, you should snapshot and diff them individually.
 
 Records in `added` and `changed` are regular ActiveRecord objects -- you can modify
-their attributes and save them.  Records in `removed`, however, can't possibly be
-backed by a database object and should be treated read-only.
+their attributes and save them.  Records in `removed` aren't
+database-backed records (obviously) and should be treated as read-only.
 
 Changed records include an `original_attributes` hash.
 For example, if you changed a record's name from 'Nexus' to 'Nexii':
@@ -139,7 +146,7 @@ record.original_attributes
 => { 'id' => 1, 'name' => 'Nexus' }
 ```
 
-Single-Table Inheritance works correctly (TODO: add to the tests!)
+Single Table Inheritance works correctly.
 
 
 #### Ignoring Noisy Columns
@@ -151,9 +158,12 @@ You can pass columns to ignore like this:
 Property.diff_snapshot ignore: %w[ id created_at updated_at ]
 ```
 
-Note that if you ignore the primary key, Table Differ can no longer compute which
-columns have changed!  This is not a problem, but changed records will appear as a
-remove followed by an add.  The changed array will always be empty.
+#### Ignoring the Primary Key column
+
+If you ignore the primary key, Table Differ can no longer compute which
+columns have changed.  This is not a problem, but changed records will
+appear as a remove followed by an add.  The changed array will always
+be empty so there's no need to specify it:
 
 ```ruby
 added,removed = Attachment.diff_snapshot(ignore: 'id')
@@ -161,10 +171,11 @@ added,removed = Attachment.diff_snapshot(ignore: 'id')
 
 Also, if you ignore the primary key, the returned records can't be used directly
 (normally Table Differ returns full ActiveRecord objects in `added` and `changed`).
-If you want to make changes to the database, you'll need to the attributes to another
-model.  One that was loaded from the database normally and still knows its ID.
+If you want to make changes to the database, you'll need to copy the attributes
+to another record  One that was loaded from the database normally and still knows
+its ID.
 
-#### Computing Changes While Ignoring the Primary Key
+#### Using unique_by to fake a Primary Key
 
 All is not lost!  If there are other fields that uniquely identify the records,
 you can specify them in the unique_by option.  This will cause changes to
@@ -185,8 +196,8 @@ Table Differ creates a full copy of the table whenever it creates a snapshot.
 Make sure you have enough disk space!
 
 Table Differ creates and restores snapshots with a single SELECT statement,
-and it diffs the tables 100% server-side using two SELECT statements (unless
-you're using `unique_by`).  It should be fast enough.
+and it diffs the tables 100% server-side using two SELECT statements (plus
+one select per changed record if you're using `unique_by`).  It should be fast enough.
 
 We don't touch indexes.  Snapshotting and restoring will not affect the indexes
 that you've created. If your table has a lot of indexes, restoring a snapshot might
