@@ -100,7 +100,7 @@ module TableDiffer
       cols = columns.map { |c| "#{c} as #{c}" }.join(", ")
 
       added =   find_by_sql("SELECT #{cols} FROM #{newtable} EXCEPT SELECT #{cols} FROM #{oldtable}")
-      removed = find_by_sql("SELECT #{cols} from #{oldtable} EXCEPT SELECT #{cols} FROM #{newtable}")
+      removed = find_by_sql("SELECT #{cols} FROM #{oldtable} EXCEPT SELECT #{cols} FROM #{newtable}")
 
       # hm, none of this seems to matter...  TODO: mark appropriate objects read-only: obj.readonly!
       # AR always thinks the record is persisted in the db, even when it obviously isn't
